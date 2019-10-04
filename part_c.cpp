@@ -17,16 +17,19 @@ int main(int argc, char **argv)
 	robot.comInt(ArCommands::ENABLE, 1);
     robot.runAsync(false);
 
-    // Used to perform actions when keyboard keys are pressed
     ArKeyHandler keyHandler;
 
 	// TODO: control the robot
 	robot.lock(); 
-	// robot.setVel(150);
-    ArFunctor1C<ArRobot, double> leftRotate(&robot, &ArRobot::setRotVel, 30);
-    keyHandler.addKeyHandler(ArKeyHandler::LEFT, &leftRotate);
-    ArFunctor1C<ArRobot, double> rightRotate(&robot, &ArRobot::setRotVel, -30);
+	ArFunctor1C<ArRobot, double> leftRotate(&robot, &ArRobot::setDeltaHeading, 30), rightRotate(&robot, &ArRobot::setDeltaHeading, -30);
+    ArFunctor1C<ArRobot, double> forward(&robot, &ArRobot::setVel, 200), backward(&robot, &ArRobot::setVel, -200);
+	ArFunctorC<ArRobot> stop(&robot, &ArRobot::stop);
+	keyHandler.addKeyHandler(ArKeyHandler::LEFT, &leftRotate);
     keyHandler.addKeyHandler(ArKeyHandler::RIGHT, &rightRotate);
+	keyHandler.addKeyHandler(ArKeyHandler::UP, &forward);
+	keyHandler.addKeyHandler(ArKeyHandler::DOWN, &backward);
+	keyHandler.addKeyHandler(ArKeyHandler::SPACE, &stop);
+		
     
     Aria::setKeyHandler(&keyHandler);
     robot.attachKeyHandler(&keyHandler);
@@ -35,7 +38,7 @@ int main(int argc, char **argv)
 	robot.unlock();
 
 	while(true){
-		printf("%f %f %f\n", robot.getX(), robot.getY(), robot.getTh());
+		printf("%f %f %f %f\n", robot.getX(), robot.getY(), robot.getTh(), robot.getRotVel());
 		ArUtil::sleep(300);
 	}
 
