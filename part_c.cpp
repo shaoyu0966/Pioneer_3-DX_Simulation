@@ -18,7 +18,9 @@ private:
 	ArFunctor1C<ArRobot, double> backward;
 
 public:
-	MyRobot():	leftRotate(robot, &ArRobot::setDeltaHeading, DELTA_HEADING),
+	MyRobot(int* argc, char** argv):
+				connector(argc, argv),
+				leftRotate(robot, &ArRobot::setDeltaHeading, DELTA_HEADING),
 				rightRotate(robot, &ArRobot::setDeltaHeading, -DELTA_HEADING),
 				forward(robot, &ArRobot::move, MOVE_STEP),
 				backward(robot, &ArRobot::move, -MOVE_STEP)
@@ -34,12 +36,13 @@ public:
 	}
 
 	void addKeyControl() {
-		robot.lock()
+		robot.lock();
 		Aria::setKeyHandler(&keyHandler);
 		robot.attachKeyHandler(&keyHandler);
 		keyHandler.addKeyHandler(ArKeyHandler::LEFT, &leftRotate);
 		keyHandler.addKeyHandler(ArKeyHandler::RIGHT, &rightRotate);
 		keyHandler.addKeyHandler(ArKeyHandler::UP, &forward);
+		// keyHandler.addKeyHandler(ArKeyHandler::UP, &safeForward);
 		keyHandler.addKeyHandler(ArKeyHandler::DOWN, &backward);
 		robot.unlock();
 	}
@@ -52,11 +55,16 @@ public:
 		printf("Press DOWN to move backward.\n");	
 	}
 
-	void getX() { return robot.getX(); }
-	void getY() { return robot.getY(); }
-	void getTh() { return robot.getTh(); }
-	void getVel() { return robot.getVel(); }
-	void getRotVel() { return robot.getRotVel(); }
+	double getX() { return robot.getX(); }
+	double getY() { return robot.getY(); }
+	double getTh() { return robot.getTh(); }
+	double getVel() { return robot.getVel(); }
+	double getRotVel() { return robot.getRotVel(); }
+
+	// void safeForward() {
+	// 	double range = sonar.currentReadingPolar(-45, 45);
+	// 	robot.move(MOVE_STEP < range? MOVE_STEP : range * 0.2);
+	// }
 };
 
 /* ------------------------------ MAIN ------------------------------ */
@@ -65,13 +73,12 @@ int main(int argc, char **argv)
 {
 	Aria::init();
 	
-	MyRobot robot();
+	MyRobot robot(&argc, argv);
 	robot.addKeyControl();
 	robot.printControlMsg();
 
 	while(true){
 		printf("%f %f %f %f %f\n", robot.getX(), robot.getY(), robot.getTh(), robot.getVel(), robot.getRotVel());
-		// printf("%f %f %f\n", sonar.currentReadingPolar(0, 180), sonar.currentReadingPolar(-180, 0), sonar.currentReadingPolar(-45, 45));
 		ArUtil::sleep(300);
 	}
 
