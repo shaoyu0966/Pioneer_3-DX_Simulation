@@ -15,26 +15,30 @@ int main(int argc, char **argv)
 		Aria::exit(1);
 	}
 	robot.comInt(ArCommands::ENABLE, 1);
-    robot.runAsync(false);
+	robot.runAsync(false);
 
     ArKeyHandler keyHandler;
 
 	// TODO: control the robot
-	robot.lock(); 
-	ArFunctor1C<ArRobot, double> leftRotate(&robot, &ArRobot::setDeltaHeading, 30), rightRotate(&robot, &ArRobot::setDeltaHeading, -30);
-    ArFunctor1C<ArRobot, double> forward(&robot, &ArRobot::setVel, 200), backward(&robot, &ArRobot::setVel, -200);
+	robot.lock();
+	
+	ArFunctor1C<ArRobot, double> leftRotate(&robot, &ArRobot::setDeltaHeading, 20), rightRotate(&robot, &ArRobot::setDeltaHeading, -20);
+    ArFunctor1C<ArRobot, double> forward(&robot, &ArRobot::move, 600), backward(&robot, &ArRobot::move, -600);
 	ArFunctorC<ArRobot> stop(&robot, &ArRobot::stop);
 	keyHandler.addKeyHandler(ArKeyHandler::LEFT, &leftRotate);
     keyHandler.addKeyHandler(ArKeyHandler::RIGHT, &rightRotate);
 	keyHandler.addKeyHandler(ArKeyHandler::UP, &forward);
 	keyHandler.addKeyHandler(ArKeyHandler::DOWN, &backward);
 	keyHandler.addKeyHandler(ArKeyHandler::SPACE, &stop);
-		
-    
+	
     Aria::setKeyHandler(&keyHandler);
     robot.attachKeyHandler(&keyHandler);
-    printf("You may press escape to exit\n");
-
+    printf("You may press escape to exit.\n");
+    printf("Press LEFT to left-rotate.\n");
+	printf("Press RIGHT to left-rotate.\n");
+	printf("Press UP to move forward.\n");
+	printf("Press DOWN to move backward.\n");
+	
 	robot.unlock();
 
 	while(true){
