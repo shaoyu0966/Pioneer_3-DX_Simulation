@@ -84,23 +84,23 @@ public:
 	}
 
     void moveTo(double x, double y, double rad) {
-		std::cout << "angle in degree: " << ArMath::radToDeg(rad) << std::endl;
-        ArPose target(x, y, ArMath::radToDeg(rad));
+		ArPose target(x, y, ArMath::radToDeg(rad));
         double move_angle = robot.getPose().findAngleTo(target);
         double move_distance = robot.findDistanceTo(target);
-        std::cout << "move angle: " << move_angle << std::endl;
-        std::cout << "move distance: " << move_distance << std::endl;
         
+		std::cout << "Rotating..." << std::endl;
         robot.lock();
         robot.setHeading(move_angle);
         robot.unlock();
 		
 		while(!robot.isHeadingDone()) ;
+		std::cout << "Moving..." << std::endl;
 		robot.lock();
 		robot.move(move_distance);
 		robot.unlock();
 
 		while(!robot.isMoveDone()) ;
+		std::cout << "Rotating..." << std::endl;
 		robot.lock();
 		robot.setHeading(ArMath::radToDeg(rad));
 		robot.unlock();
