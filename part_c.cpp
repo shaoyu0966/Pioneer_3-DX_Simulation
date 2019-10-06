@@ -1,5 +1,7 @@
 # include "Aria.h"
 # include <iostream>
+# include <iomanip>
+# include <string>
 # define DELTA_HEADING 20
 # define MOVE_STEP 600
 
@@ -15,7 +17,7 @@ private:
 	ArFunctor1C<ArRobot, double> leftRotate;
 	ArFunctor1C<ArRobot, double> rightRotate;
     // ArFunctor1C<ArRobot, double> forward;
-	ArFunctor1C<ArRobot, double> backward;
+	// ArFunctor1C<ArRobot, double> backward;
 	ArFunctorC<MyRobot> safe_forward;
 	ArFunctorC<MyRobot> safe_backward;
 
@@ -66,8 +68,6 @@ public:
 	double getVel() { return robot.getVel(); }
 	double getRotVel() { return robot.getRotVel(); }
 	
-	double getSonarReading(int start_angle, int end_angle) { return sonar.currentReadingPolar(start_angle, end_angle); }
-
 	void safeForward() {
 		double range = sonar.currentReadingPolar(-45, 45);
 		robot.move(range >= 5 * MOVE_STEP? MOVE_STEP : range * 0.2);
@@ -89,9 +89,14 @@ int main(int argc, char **argv)
 	robot.addKeyControl();
 	robot.printControlMsg();
 
-	while(true){
-		printf("%f %f %f %f %f\n", robot.getX(), robot.getY(), robot.getTh(), robot.getVel(), robot.getRotVel());
-		printf("front range: %f %f\n", robot.getSonarReading(-45, 45), robot.getSonarReading(135, 225));
+	for(int i = 0; i >= 0; i++){
+
+		if(!(i % 10)){
+			std::cout << std::string(54, '-') << std::endl;
+			printf("%10s %10s %10s %10s %10s\n", "X", "Y", "Theta", "Vel", "RotVel");
+		}
+
+		printf("%10.2f %10.2f %10.2f %10.2f %10.2f\n", robot.getX(), robot.getY(), robot.getTh(), robot.getVel(), robot.getRotVel());
 		ArUtil::sleep(300);
 	}
 
