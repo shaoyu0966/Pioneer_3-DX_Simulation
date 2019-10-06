@@ -84,54 +84,57 @@ public:
 	}
 
     double safeRange() {
-        return (sonar.currentReadingPolar(-45, 45) - 1.5 * robot.getRobotLengthFront());
+        return (getSonarReading(-30, 30) - 2 * robot.getRobotRadius());
+    }
+    void atomicMove(double distance) {
+        robot.lock();
+        robot.move(distance);
+        robot.unlock();
+        while(!robot.isMoveDone()) ;
+    }
+    void atomicRotate(double deg) {
+        robot.lock();
+        robot.setHeading(deg);
+        robot.unlock();
+        while(!robot.isHeadingDone()) ;
     }
 
     void moveTo(double x, double y, double rad) {
 
 		ArPose target(x, y, ArMath::radToDeg(rad));
-        double front_range = 0;
+        ArPose recent_pose = getPose();
+        bool no_update_recently = false;
+        double front_range = 0, left_range = 0, right_range = 0;
         double move_angle = 0;
         double move_distance = 0;
-        double left_range = 0, right_range = 0;
         
-        while(true){
-                       
+        for(int i = 0; i >= 0; i++){
+
             move_angle = robot.getPose().findAngleTo(target);
             move_distance = robot.findDistanceTo(target);
+			no_update_recently = false;
+            if(!(i % 3)){
+                no_update_recently = robot.findDistanceTo(recent_pose) < move_distance * 0.05;
+                recent_pose = getPose();
+            }
 
-            robot.lock();
-            robot.setHeading(move_angle);
-            robot.unlock();
-            while(!robot.isHeadingDone()) ;
+
+            atomicRotate(move_angle);
             front_range = getSonarReading(-30, 30);
 
             if(front_range >= move_distance) {
-                robot.lock();
-                robot.move(move_distance);
-                robot.unlock();
-                while(!robot.isMoveDone()) ;
-                // rotate
+                atomicMove(move_distance);
+                atomicRotate(rad);
                 break;
             }
 
-            robot.lock();
-            robot.move(std::min(front_range * 0.75, safeRange()));
-            robot.unlock();
-            while(!robot.isMoveDone()) ;
-            left_range = getSonarReading(60, 120);
-            right_range = getSonarReading(-120, -60);
-            
-            robot.lock();
-            robot.setHeading(robot.getTh() + 90 * (left_range > right_range? 1 : (-1)));
-            robot.unlock();
-            while(!robot.isHeadingDone()) ;
+			double partial_move_distance = std::min(front_range * 0.75, safeRange());
+            atomicMove(partial_move_distance);
+            left_range = getSonarReading(15, 105);
+            right_range = getSonarReading(-105, -15);
 
-            robot.lock();
-            robot.move(std::min(std::max(left_range, right_range) * 0.5, safeRange()));
-            robot.unlock();
-            while(!robot.isMoveDone()) ;
-            
+            atomicRotate(robot.getTh() + (no_update_recently? 120 : 60) * (left_range > right_range? 1 : (-1)));
+            atomicMove(std::min(getSonarReading(-30, 30) * 0.5, safeRange()));
         }
 
     }
