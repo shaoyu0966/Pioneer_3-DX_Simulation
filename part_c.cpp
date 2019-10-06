@@ -1,6 +1,5 @@
 # include "Aria.h"
 # include <iostream>
-# include <iomanip>
 # include <string>
 # define DELTA_HEADING 20
 # define MOVE_STEP 600
