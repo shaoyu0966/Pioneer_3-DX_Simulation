@@ -16,8 +16,6 @@ private:
 	ArKeyHandler keyHandler;
 	ArFunctor1C<ArRobot, double> leftRotate;
 	ArFunctor1C<ArRobot, double> rightRotate;
-    // ArFunctor1C<ArRobot, double> forward;
-	// ArFunctor1C<ArRobot, double> backward;
 	ArFunctorC<MyRobot> safe_forward;
 	ArFunctorC<MyRobot> safe_backward;
 
@@ -26,8 +24,6 @@ public:
 				connector(argc, argv),
 				leftRotate(robot, &ArRobot::setDeltaHeading, DELTA_HEADING),
 				rightRotate(robot, &ArRobot::setDeltaHeading, -DELTA_HEADING),
-				// forward(robot, &ArRobot::move, MOVE_STEP),
-				// backward(robot, &ArRobot::move, -MOVE_STEP),
 				safe_forward(*this, &MyRobot::safeForward),
 				safe_backward(*this, &MyRobot::safeBackward)
 	{
@@ -47,8 +43,6 @@ public:
 		robot.attachKeyHandler(&keyHandler);
 		keyHandler.addKeyHandler(ArKeyHandler::LEFT, &leftRotate);
 		keyHandler.addKeyHandler(ArKeyHandler::RIGHT, &rightRotate);
-		// keyHandler.addKeyHandler(ArKeyHandler::UP, &forward);
-		// keyHandler.addKeyHandler(ArKeyHandler::DOWN, &backward);
 		keyHandler.addKeyHandler(ArKeyHandler::UP, &safe_forward);
 		keyHandler.addKeyHandler(ArKeyHandler::DOWN, &safe_backward);
 		robot.unlock();
@@ -104,39 +98,35 @@ public:
 		ArPose target(x, y, ArMath::radToDeg(rad));
         ArPose recent_pose = getPose();
         bool no_update_recently = false;
-        double front_range = 0, left_range = 0, right_range = 0;
+        double front_range = 0;
         double move_angle = 0;
         double move_distance = 0;
         
         for(int i = 0; i >= 0; i++){
-
+			// define target
             move_angle = robot.getPose().findAngleTo(target);
             move_distance = robot.findDistanceTo(target);
 			no_update_recently = false;
             if(!(i % 3)){
-                no_update_recently = robot.findDistanceTo(recent_pose) < move_distance * 0.05;
+                no_update_recently = robot.findDistanceTo(recent_pose) < move_distance * 0.1;
                 recent_pose = getPose();
             }
-
-
+			
+			// attempt to reach the target directly
             atomicRotate(move_angle);
             front_range = getSonarReading(-30, 30);
-
             if(front_range >= move_distance) {
                 atomicMove(move_distance);
                 atomicRotate(rad);
                 break;
             }
-
-			double partial_move_distance = std::min(front_range * 0.75, safeRange());
-            atomicMove(partial_move_distance);
-            left_range = getSonarReading(15, 105);
-            right_range = getSonarReading(-105, -15);
-
-            atomicRotate(robot.getTh() + (no_update_recently? 120 : 60) * (left_range > right_range? 1 : (-1)));
+			
+			// offset required, move-turn-move
+            atomicMove(std::min(front_range * 0.75, safeRange()));
+            atomicRotate(robot.getTh() + (no_update_recently? 120 : 60) * (getSonarReading(15, 105) > getSonarReading(-105, -15)? 1 : (-1)));
             atomicMove(std::min(getSonarReading(-30, 30) * 0.5, safeRange()));
         }
-
+		
     }
 };
 
@@ -151,20 +141,8 @@ int main(int argc, char **argv)
 	Aria::init();
 	MyRobot robot(&argc, argv);
 	robot.addKeyControl();
-	// robot.printControlMsg();
 	
 	robot.moveTo(target_x, target_y, target_th);
-
-	for(int i = 0; i >= 0; i++){
-
-		if(!(i % 10)){
-			std::cout << std::string(54, '-') << std::endl;
-			printf("%10s %10s %10s %10s %10s\n", "X", "Y", "Theta", "Vel", "RotVel");
-		}
-
-		printf("%10.2f %10.2f %10.2f %10.2f %10.2f\n", robot.getX(), robot.getY(), robot.getTh(), robot.getVel(), robot.getRotVel());
-		ArUtil::sleep(300);
-	}
 
 	Aria::shutdown();
 	Aria::exit(0);
