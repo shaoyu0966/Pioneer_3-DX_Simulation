@@ -1,7 +1,6 @@
 # include "Aria.h"
 # include <iostream>
 # include <string>
-# include <algorithm>
 # define DELTA_HEADING 20
 # define MOVE_STEP 600
 
@@ -122,9 +121,9 @@ public:
             }
 			
 			// offset required, move-turn-move
-            atomicMove(std::min(front_range * 0.75, safeRange()));
+            atomicMove(safeRange() * 0.75);
             atomicRotate(robot.getTh() + (no_update_recently? 120 : 60) * (getSonarReading(15, 105) > getSonarReading(-105, -15)? 1 : (-1)));
-            atomicMove(std::min(getSonarReading(-30, 30) * 0.5, safeRange()));
+            atomicMove(safeRange() * 0.5);
         }
 
     }
