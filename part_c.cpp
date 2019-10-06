@@ -69,12 +69,16 @@ public:
 	double getRotVel() { return robot.getRotVel(); }
 	
 	void safeForward() {
-		double range = sonar.currentReadingPolar(-45, 45);
+		robot.lock();
+		double range = sonar.currentReadingPolar(-45, 45) - robot.getRobotRadius() * 1.2;
 		robot.move(range >= 5 * MOVE_STEP? MOVE_STEP : range * 0.2);
+		robot.unlock();
 	}
 	void safeBackward() {
-		double range = sonar.currentReadingPolar(135, 225);
+		robot.lock();
+		double range = sonar.currentReadingPolar(135, 225) - robot.getRobotRadius() * 1.2;
 		robot.move(range >= 6 * MOVE_STEP? -MOVE_STEP : range * (-0.1));
+		robot.unlock();
 	}
 };
 
@@ -90,7 +94,7 @@ int main(int argc, char **argv)
 	robot.printControlMsg();
 
 	for(int i = 0; i >= 0; i++){
-
+		
 		if(!(i % 10)){
 			std::cout << std::string(54, '-') << std::endl;
 			printf("%10s %10s %10s %10s %10s\n", "X", "Y", "Theta", "Vel", "RotVel");

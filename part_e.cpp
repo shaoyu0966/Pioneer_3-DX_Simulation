@@ -73,13 +73,13 @@ public:
 	void safeForward() {
         robot.lock();
 		double range = sonar.currentReadingPolar(-45, 45);
-		robot.move(range >= 5 * MOVE_STEP? MOVE_STEP : range * 0.2);
+		robot.move(range >= 5 * MOVE_STEP? MOVE_STEP : range * 0.2) - robot.getRobotRadius() * 1.2;
         robot.unlock();
 	}
 	void safeBackward() {
         robot.lock();
 		double range = sonar.currentReadingPolar(135, 225);
-		robot.move(range >= 6 * MOVE_STEP? -MOVE_STEP : range * (-0.1));
+		robot.move(range >= 6 * MOVE_STEP? -MOVE_STEP : range * (-0.1)) - robot.getRobotRadius() * 1.2;
         robot.unlock();
 	}
 
