@@ -3,8 +3,14 @@ CFLAGS = -fPIC -g -Wall
 ARIA_INCLUDE = -I/usr/local/Aria/include
 ARIA_LINK = -L/usr/local/Aria/lib -lAria -lpthread -ldl -lrt
 
+all: part_c part_e
+
 part_c: part_c.cpp
 	$(CXX) $(CFLAGS) $(ARIA_INCLUDE) part_c.cpp -o part_c $(ARIA_LINK)
+
+part_e: part_e.cpp
+	$(CXX) $(CFLAGS) $(ARIA_INCLUDE) part_e.cpp -o part_e $(ARIA_LINK)
+
 # $<: current dependencies
 # $@: current target
 # $*: current dependencies, without file extensions
