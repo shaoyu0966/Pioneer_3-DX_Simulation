@@ -117,7 +117,7 @@ public:
             front_range = getSonarReading(-30, 30);
             if(front_range >= move_distance) {
                 atomicMove(move_distance);
-                atomicRotate(rad);
+                atomicRotate(ArMath::radToDeg(rad));
                 break;
             }
 			
@@ -126,7 +126,7 @@ public:
             atomicRotate(robot.getTh() + (no_update_recently? 120 : 60) * (getSonarReading(15, 105) > getSonarReading(-105, -15)? 1 : (-1)));
             atomicMove(std::min(getSonarReading(-30, 30) * 0.5, safeRange()));
         }
-		
+
     }
 };
 
