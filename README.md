@@ -1,6 +1,6 @@
 # Pioneer_3-DX_Simulation
 
-### **Part C**
+### **Part C - Keyboard Navigation**
 
 Users can manipulate the robot with the keyboard by hitting four different keys in an intuitive way:
 
@@ -14,7 +14,7 @@ This feature is designed to avoid the robot from collision.
 
 --
 
-### **Part E**
+### **Part E - Direct Access**
 
 Given a target pose *(X, Y, θ)*, the robot moves from the current pose *(0, 0, 0)* to the target pose directly in a straight path.
 This assumes that there are no obstacles within the direct path. \
@@ -26,7 +26,7 @@ The movement can be seperated into the following three steps.
 
 --
 
-### **Bonus**
+### **Bonus - Path Exploration**
 
 Similar as part E, but obstacles are allowed in this case.
 
